@@ -1,0 +1,38 @@
+sequenceDiagram
+
+participant phase
+participant client
+participant core_collector
+participant collect
+
+phase -->> client: collect()
+client -->> client: initialize archive
+client -->> client: initialize exclude data from files list
+client -->> core_collector: run_collection()
+core_collector-->>core_collector: list of regex and file excluded
+core_collector-->core_collector: collect.default_manifest or config.manifest
+core_collector-->>collect: collect()
+collect-->>collect: load_manifest
+collect-->dr: upload dr components information
+note right of collect: load_packages, apply_default_enabled
+note right of collect: apply_configs, apply_blacklist
+collect-->>collect: prepare archive for collection
+collect-->>dr: initialize broker and set HostContext
+loop for each component 
+collect -->> collect: new hydration component
+collect-->>collect: add hydration observer to broker
+end
+collect-->>dr: run_all( broker, pool )
+dr-->>dr: run_incremental()
+note right of dr: split pool in independent graphs
+dr-->>dr: run(sub_graph) 
+note right of dr: executes components in the subgraph satisfying its dependencies
+dr -->> collect: return broker
+note right of dr: results are already stored in the archive
+collect -->>core_collector: archive path
+core_collector-->>core_collector: redact archive
+core_collector-->>client: return execution
+client-->>core_collector: dc_done
+note right of core_collector: if obfuscation is done now
+core_collector-->>client: archive compressed, return execution
+client -->> phase: archive
