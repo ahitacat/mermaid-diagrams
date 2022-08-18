@@ -1,0 +1,24 @@
+%%{init: {'theme':'base'}}%%
+flowchart TB
+    %%subgraph insights-client-egg-builder
+    subgraph insights-engine
+    A[MR upload setup.py] -- pipelines --> B{OK?}
+    B -- yes --> D[Push into /master]
+    D --> E[Build egg]
+    end
+    subgraph insights-core-assets
+    E --> F[Upload egg in /develop]
+    end
+    %%end
+    subgraph insights-core-assets
+    F --pipelines-->G[testing]
+    G --> H{OK?}
+    H --yes--> I[Sign egg]
+    I --> J[push /develop -> /master]
+    J --> K[CDN /testing]
+    K --> L{Ready?}
+    end
+    L --> M[Tag]
+    M --pipelines--> N[CDN /release]
+
+
