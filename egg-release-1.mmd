@@ -1,0 +1,14 @@
+flowchart LR
+    A[New tag in insights-core]-->D
+    B[New tag in insights-plugins]-->D
+    C[New tag in prodsec-rules]-->D
+    subgraph insights-engine
+    D[Update version setup.py]-->E
+    E[New PR]--triggers-->F
+    F[External pipeline insights-engine-ci]--push-->G
+    G[merged into /master]--triggers-->H
+    G--triggers-->I
+    H[Build egg]-->J
+    I[Creates a PR]-->J
+    J[PR in /develop]
+    end
