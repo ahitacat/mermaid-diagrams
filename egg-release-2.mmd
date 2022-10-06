@@ -4,20 +4,26 @@ flowchart TB
     BC-->BCA{Passed?}
     BCA-->|No| BCAA[Fix uploader json]
     A-- triggers-->BD[Check GPG]
-    BD--> BDA["fas:fa-xmark"]
+    BD--> BDA["fas:fa-xmark"]:::fail
     A--triggers-->BA
-    BA["fab:fa-jenkins" Pipelines!] --> BB{Pipelines succed?}
+    BA["fab:fa-jenkins" Pipelines!] --> BB{Pipelines succeed?}
     BB-->|"fas:fa-xmark" No| C[Fix code/pipelines]
     BB-->|"fas:fa-check" Yes| AA
-    AA[create PR /develop -> /master] -->D
-    D[Sign the egg]--triggers-->DD["fab:fa-jenkins" Pipelines!]
+    AA[create PR /develop -> /master]:::manual -->D
+    D[Sign the egg]:::manual--triggers-->DD["fab:fa-jenkins" Pipelines!]
     DD-->|"fas:fa-xmark" No| C[Fix code/pipelines]
     DD-->|"fas:fa-check" Yes| E
     D --triggers--> DA[Validate uploader]
     D --triggers--> DB[Check GPG] 
-    DB-->DC["fas:fa-check"]
-    E[Merge PR in /master]-- triggers-->F
-    F[Pipelines in /testing]-->FF{Pipelines succed?}
+    DB-->DC["fas:fa-check"]:::succeed
+    E[Merge PR in /master]:::manual-- triggers-->FA
+    FA[Push /deploy to /testing] --triggers-->F
+    F[Pipelines in /testing]-->FF{Pipelines succeed?}
     FF-->|"fas:fa-xmark" No| G[Fix pipelines]
-    FF-->|"fas:fa-check" Yes| H[Generate Tag]
+    FF-->|"fas:fa-check" Yes| H[Generate Tag]:::manual
+    H --triggers-->I[Push /deploy to /release]
     end
+
+    classDef manual fill:#f96;
+    classDef succeed fill:#7FFF00;
+    classDef fail fill:#FF0000;
